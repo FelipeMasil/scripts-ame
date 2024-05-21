@@ -5,6 +5,7 @@ $sourceFolders = @(
     "\\ames-fat-01\c$\datasus\SisMamaFB",
     "\\ames-fat-01\c$\Program Files (x86)\Datasus\CNES"
 )
+$additionalFile = "\\172.35.16.82\C$\datasus\sisMamaFB\Banco\SISCAM4FBM.FDB"
 $destinationFolder = "D:\Faturamento"
 
 # Criar o diretório de destino se não existir
@@ -25,8 +26,17 @@ foreach ($folder in $sourceFolders) {
     }
 }
 
+# Copiar o arquivo adicional se o caminho de origem existir
+if (Test-Path -Path $additionalFile) {
+    $fileName = Split-Path -Path $additionalFile -Leaf
+    $destinationPath = Join-Path -Path $destinationFolder -ChildPath $fileName
+    Copy-Item -Path $additionalFile -Destination $destinationPath -Force
+} else {
+    Write-Host "Caminho de origem não encontrado ou máquina desligada: $additionalFile"
+}
+
 # Definir o nome do arquivo .tar com a data atual
-$date = Get-Date -Format "yyyy-MM-dd"
+$date = Get-Date -Format "dd_MM_yyyy"
 $tarFileName = "bkp-fat-data-$date.tar"
 $tarFilePath = Join-Path -Path $destinationFolder -ChildPath $tarFileName
 
@@ -36,6 +46,14 @@ Start-Process tar -ArgumentList "-cvf", $tarFilePath, "-C", $destinationFolder, 
 
 # Verificar se o arquivo .tar foi criado
 if (Test-Path -Path $tarFilePath) {
+
+    if (Test-Path -Path $tarFilePath) {
+
+        # Remover o arquivo SISCAM4FBM.FDB
+        $additionalFileName = Split-Path -Path $additionalFile -Leaf
+        $additionalFilePath = Join-Path -Path $destinationFolder -ChildPath $additionalFileName
+        Remove-Item -Path $additionalFilePath -Force
+
     # Remover as pastas copiadas
     foreach ($folder in $sourceFolders) {
         $folderName = Split-Path -Path $folder -Leaf
