@@ -45,8 +45,6 @@ $tarFilePath = Join-Path -Path $destinationFolder -ChildPath $tarFileName
 Start-Process tar -ArgumentList "-cvf", $tarFilePath, "-C", $destinationFolder, "." -NoNewWindow -Wait
 
 # Verificar se o arquivo .tar foi criado
-if (Test-Path -Path $tarFilePath) {
-
     if (Test-Path -Path $tarFilePath) {
 
         # Remover o arquivo SISCAM4FBM.FDB
@@ -63,8 +61,8 @@ if (Test-Path -Path $tarFilePath) {
 
     # Gerenciar o número de backups, mantendo apenas os 4 mais recentes
     $backupFiles = Get-ChildItem -Path $destinationFolder -Filter "bkp-fat-data-*.tar" | Sort-Object LastWriteTime
-    if ($backupFiles.Count -gt 4) {
-        $filesToDelete = $backupFiles | Select-Object -First ($backupFiles.Count - 4)
+    if ($backupFiles.Count -gt 6) {
+        $filesToDelete = $backupFiles | Select-Object -First ($backupFiles.Count - 6)
         foreach ($file in $filesToDelete) {
             Remove-Item -Path $file.FullName -Force
         }
